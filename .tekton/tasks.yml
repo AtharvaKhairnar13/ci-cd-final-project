@@ -1,16 +1,11 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: cleanup-and-nose
+  name: cleanup
 spec:
-  description: This task will clean up a workspace by deleting all the files and then run unit tests.
+  description: This task will clean up a workspace by deleting all the files.
   workspaces:
     - name: source
-  params:
-    - name: args
-      description: Arguments to pass to nose
-      type: string
-      default: "-v"
   steps:
     - name: remove
       image: alpine:3
@@ -38,6 +33,20 @@ spec:
           rm -rf "${WORKSPACE_SOURCE_PATH}"/..?*
         fi
 
+---
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: nose
+spec:
+  workspaces:
+    - name: source
+  params:
+    - name: args
+      description: Arguments to pass to nose
+      type: string
+      default: "-v"
+  steps:
     - name: nosetests
       image: python:3.9-slim
       workingDir: $(workspaces.source.path)
